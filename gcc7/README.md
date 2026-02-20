@@ -16,75 +16,68 @@ cd /usr/local
 sudo tar xzf gcc7-7.5.0-tiger-ppc.tar.gz
 ```
 
-After installation:
-- `/usr/local/bin/gcc-7` - C compiler
-- `/usr/local/bin/g++-7` - C++ compiler
-- `/usr/local/Cellar/gcc7/7.5.0/` - Full installation
+After installation, binaries are located at:
+- `/usr/local/gcc7/7.5.0/bin/gcc-7` - C compiler
+- `/usr/local/gcc7/7.5.0/bin/g++-7` - C++ compiler
+
+To use without full paths, add to your shell profile (`~/.bash_profile`):
+```bash
+export PATH="/usr/local/gcc7/7.5.0/bin:$PATH"
+export DYLD_LIBRARY_PATH="/usr/local/gcc7/7.5.0/lib/gcc/7:$DYLD_LIBRARY_PATH"
+```
+
+## Fixing the libisl "Library not loaded" Error
+
+If you see:
+```
+dyld: Library not loaded: /usr/local/lib/libisl.15.dylib
+  Referenced from: .../cc1
+  Reason: image not found
+```
+
+**Fix** — copy `libisl.15.dylib` to where `dyld` expects it:
+```bash
+sudo cp /usr/local/gcc7/7.5.0/lib/libisl.15.dylib /usr/local/lib/
+```
+
+Or symlink:
+```bash
+sudo ln -s /usr/local/gcc7/7.5.0/lib/libisl.15.dylib /usr/local/lib/libisl.15.dylib
+```
+
+This is a one-time step. `libisl` (Integer Set Library) is included in the tarball but `dyld` looks for it in `/usr/local/lib`.
 
 ## Standalone C++ Package
 
-Self-contained package with wrapper scripts that handle the libstdc++ path.
+Self-contained with wrapper scripts that handle the libstdc++ path.
 
 ```bash
-# Extract anywhere
 tar xzf gcc7-cpp-ppc.tar.gz
 cd gcc7-cpp
 
-# Compile with C++11
-./g++11 mycode.cpp -o myprogram
-
-# Compile with C++14
-./g++14 mycode.cpp -o myprogram
-
-# Compile with C++17
-./g++17 mycode.cpp -o myprogram
-
-# Run compiled binary (sets library path)
-./run-cpp ./myprogram
+./g++11 mycode.cpp -o myprogram   # C++11
+./g++14 mycode.cpp -o myprogram   # C++14
+./g++17 mycode.cpp -o myprogram   # C++17
+./run-cpp ./myprogram              # Run with correct library path
 ```
 
-**Why wrappers?** Tiger ships with ancient libstdc++ (GCC 4.0). The wrappers
-set `DYLD_LIBRARY_PATH` so your C++11/14/17 code uses the GCC 7 runtime.
-
-## Tested C++ Features
-
-### C++11
-- Lambdas, auto, range-based for
-- std::shared_ptr, std::unique_ptr
-- std::thread, std::mutex
-- Move semantics
-
-### C++14
-- Generic lambdas
-- std::make_unique
-- Digit separators (1'000'000)
-
-### C++17
-- std::optional, std::variant
-- std::string_view
-- Structured bindings
-- if/switch with initializer
+**Why wrappers?** Tiger's stock libstdc++ is GCC 4.0 era. Wrappers set `DYLD_LIBRARY_PATH` to use the GCC 7 runtime.
 
 ## General Usage
 
 ```bash
-# C compilation with AltiVec
+# C with AltiVec
 gcc-7 -mcpu=7450 -maltivec -O2 -o program program.c
 
-# C++ compilation (full install)
+# C++17
 g++-7 -mcpu=7450 -maltivec -O2 -std=c++17 -o program program.cpp
-
-# C++ with runtime path (needed if not using wrappers)
-DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc7/7.5.0/lib/gcc/7 ./myprogram
 ```
 
-## Why This Matters
+## Tested C++ Features
 
-Stock Tiger has GCC 4.0.1 (2005). GCC 7.5.0 enables:
-- Building modern software (QuickJS, Node.js, etc.)
-- C++17 features
-- Better optimization
-- CVE patches for legacy code
+- **C++11**: Lambdas, auto, range-for, shared_ptr, thread/mutex, move semantics
+- **C++14**: Generic lambdas, make_unique, digit separators
+- **C++17**: optional, variant, string_view, structured bindings, if-with-initializer
 
 ## Architecture
 - **Target**: powerpc-apple-darwin8 (Tiger), darwin9 (Leopard)
