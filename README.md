@@ -184,3 +184,11 @@ clang -mcpu=pwr9 -mtune=pwr9 -O3
 # IBM XL C for Power10
 xlc -qarch=pwr10 -qtune=pwr10 -O3
 ```
+
+---
+
+### Part of the Elyan Labs Ecosystem
+
+- [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
+- [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
+- [GitHub](https://github.com/Scottcjn)
